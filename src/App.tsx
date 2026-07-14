@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { makeObtainiumLink } from "./shared/obtainium";
 import type { AppResult, SearchResponse } from "./shared/types";
 import "./index.css";
@@ -7,6 +7,7 @@ type UiState = "idle" | "loading" | "ready" | "error";
 
 export function App() {
   const [query, setQuery] = useState("");
+  const [submittedQuery, setSubmittedQuery] = useState("");
   const [apps, setApps] = useState<AppResult[]>([]);
   const [hasMore, setHasMore] = useState(false);
   const [page, setPage] = useState(0);
@@ -38,17 +39,19 @@ export function App() {
     }
   }
 
-  useEffect(() => {
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
     const q = query.trim();
     if (!q) {
       abortRef.current?.abort();
+      setSubmittedQuery("");
       setApps([]);
       setState("idle");
       return;
     }
-    const timer = setTimeout(() => runSearch(q, 0, false), 350);
-    return () => clearTimeout(timer);
-  }, [query]);
+    setSubmittedQuery(q);
+    runSearch(q, 0, false);
+  }
 
   return (
     <div className="page">
@@ -58,14 +61,19 @@ export function App() {
           Поиск по каталогу RuStore - добавление в <a href="https://github.com/ImranR98/Obtainium">Obtainium</a> (&ge; 1.1.41).
         </p>
 
-        <input
-          type="search"
-          className="search-input"
-          placeholder="название приложения…"
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          autoFocus
-        />
+        <form className="search-form" onSubmit={handleSubmit}>
+          <input
+            type="search"
+            className="search-input"
+            placeholder="название приложения…"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            autoFocus
+          />
+          <button type="submit" className="search-btn" disabled={state === "loading"}>
+            найти
+          </button>
+        </form>
 
         {state === "idle" && <p className="muted">Введите запрос - например, "2gis".</p>}
         {state === "loading" && <p className="muted">поиск…</p>}
@@ -99,7 +107,7 @@ export function App() {
           <button
             className="more-btn"
             disabled={loadingMore}
-            onClick={() => runSearch(query.trim(), page + 1, true)}
+            onClick={() => runSearch(submittedQuery, page + 1, true)}
           >
             {loadingMore ? "загрузка…" : "показать ещё"}
           </button>

@@ -58,7 +58,8 @@ export function App() {
       <div className="container">
         <h1>RuStore-2-Obtainium</h1>
         <p className="muted">
-          Поиск по каталогу RuStore - добавление в <a href="https://github.com/ImranR98/Obtainium">Obtainium</a> (&ge; 1.1.41).
+          Поиск по каталогу RuStore - добавление в <a href="https://github.com/ImranR98/Obtainium">Obtainium</a> (&ge; 1.7.2).
+          Старые версии не проходят подпись запросов RuStore и не доверяют сертификату Минцифры на CDN.
         </p>
 
         <form className="search-form" onSubmit={handleSubmit}>
@@ -91,6 +92,11 @@ export function App() {
                     <span className="app-meta">
                       <span className="app-rating">★ {app.rating.toFixed(1)}</span>
                       <span className="muted">{app.downloadsText}</span>
+                      {app.isPaid && (
+                        <span className="app-paid" title="Obtainium не сможет скачать платное приложение">
+                          платное
+                        </span>
+                      )}
                     </span>
                     <span className="app-pkg muted">{app.packageName}</span>
                     {app.shortDescription && (

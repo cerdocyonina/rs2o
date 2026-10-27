@@ -182,6 +182,15 @@ a {
   white-space: nowrap;
 }
 
+.app-paid {
+  border: 1px solid #c4442a;
+  color: #c4442a;
+  border-radius: 999px;
+  padding: 0 0.5rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 .app-pkg {
   font-family: ui-monospace, "Cascadia Mono", Menlo, monospace;
   font-size: 12px;

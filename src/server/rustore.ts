@@ -1,5 +1,7 @@
 import type { SearchResponse } from "../shared/types";
 
+// Поиск по-прежнему отвечает без "secure session" (X-Client-Signature);
+// overallInfo и download-link её требуют, но их вызывает сам Obtainium.
 const SEARCH_URL = "https://backapi.rustore.ru/applicationData/apps";
 const PAGE_SIZE = 20;
 const USER_AGENT =
@@ -12,6 +14,7 @@ type RuStoreApp = {
   shortDescription: string | null;
   averageUserRating: number;
   roundedDownloadsText: string;
+  price: number;
 };
 
 type RuStoreSearchResponse = {
@@ -36,6 +39,7 @@ export function normalizeSearchResponse(raw: RuStoreSearchResponse): SearchRespo
       shortDescription: app.shortDescription ?? "",
       rating: app.averageUserRating,
       downloadsText: app.roundedDownloadsText,
+      isPaid: app.price > 0,
     })),
     hasMore: raw.body.pageNumber + 1 < raw.body.totalPages,
   };

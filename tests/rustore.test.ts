@@ -1,7 +1,7 @@
 import { test, expect } from "bun:test";
 import { normalizeSearchResponse, createSearchClient } from "../src/server/rustore";
 
-// усечённая копия реального ответа backapi.rustore.ru/applicationData/apps (query=2gis)
+// усечённая копия реального ответа backapi.rustore.ru/applicationData/apps (query=2gis, pageSize=2)
 const rawFixture = {
   code: "OK",
   message: null,
@@ -13,23 +13,32 @@ const rawFixture = {
         minSdkVersion: 28,
         appName: "2ГИС: навигатор, транспорт, друзья на карте",
         shortDescription:
-          "Геопозиция близких. Автомобильный и пешеходный навигатор. Расписание автобусов.",
-        iconUrl: "https://static.rustore.ru/2026/2/2/1e/apk/260799/content/ICON/icon.png",
+          "Автомобильный и пешеходный навигатор. Расписание автобусов. Геопозиция близких. ",
+        iconUrl:
+          "https://static.rustore.ru/2026/2/2/1e/apk/260799/content/ICON/8e439c58-11cf-4e0a-a3dc-9596eda08cfd.png",
         appType: "MAIN",
-        versionCode: 282010622,
+        versionCode: 282010635,
         price: 0,
-        averageUserRating: 4.23,
-        totalRatings: 38092,
+        averageUserRating: 4.21,
+        totalRatings: 42008,
+        labelIds: [7],
         isNavSuggest: false,
-        roundedDownloadsText: "20 млн +",
+        roundedDownloadsText: "30 млн +",
       },
     ],
+    advertAppInfo: null,
     pageNumber: 0,
-    pageSize: 20,
-    totalElements: 99,
-    totalPages: 99,
+    pageSize: 2,
+    totalElements: 122,
+    totalPages: 61,
+    searchQueryId: "ad26b0994743f95d",
+    showcaseQId: "ad26b0994743f95d",
+    spellchecker: { originQuery: "2gis", modifiedQuery: "2gis" },
+    navigSuggestsAppsIds: [],
+    paymentTypeFilterEnabled: false,
+    searchAnimationUrl: null,
   },
-  timestamp: "2026-07-14T15:43:54.753Z",
+  timestamp: "2026-10-27T07:44:42.512Z",
 };
 
 test("normalizeSearchResponse маппит поля и считает hasMore", () => {
@@ -39,11 +48,13 @@ test("normalizeSearchResponse маппит поля и считает hasMore", 
       {
         packageName: "ru.dublgis.dgismobile",
         appName: "2ГИС: навигатор, транспорт, друзья на карте",
-        iconUrl: "https://static.rustore.ru/2026/2/2/1e/apk/260799/content/ICON/icon.png",
+        iconUrl:
+          "https://static.rustore.ru/2026/2/2/1e/apk/260799/content/ICON/8e439c58-11cf-4e0a-a3dc-9596eda08cfd.png",
         shortDescription:
-          "Геопозиция близких. Автомобильный и пешеходный навигатор. Расписание автобусов.",
-        rating: 4.23,
-        downloadsText: "20 млн +",
+          "Автомобильный и пешеходный навигатор. Расписание автобусов. Геопозиция близких. ",
+        rating: 4.21,
+        downloadsText: "30 млн +",
+        isPaid: false,
       },
     ],
     hasMore: true,
@@ -51,8 +62,16 @@ test("normalizeSearchResponse маппит поля и считает hasMore", 
 });
 
 test("normalizeSearchResponse: hasMore=false на последней странице", () => {
-  const lastPage = { ...rawFixture, body: { ...rawFixture.body, pageNumber: 98 } };
+  const lastPage = { ...rawFixture, body: { ...rawFixture.body, pageNumber: 60 } };
   expect(normalizeSearchResponse(lastPage).hasMore).toBe(false);
+});
+
+test("normalizeSearchResponse помечает платные приложения", () => {
+  const paid = {
+    ...rawFixture,
+    body: { ...rawFixture.body, content: [{ ...rawFixture.body.content[0]!, price: 9900 }] },
+  };
+  expect(normalizeSearchResponse(paid).apps[0]!.isPaid).toBe(true);
 });
 
 function fixtureResponse() {
